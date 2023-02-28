@@ -1,6 +1,12 @@
 const app = require('express')();
 const http = require('http').createServer(app);
 
+app.use(function(req, res, next) {
+  // Mọi domain
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
+
 // jwt secret
 const JWT_SECRET = 'myRandomHash';
 
@@ -10,6 +16,8 @@ const io = require("socket.io")(http, {
     credentials: true
   },
 });
+
+
 
 app.get('/', (req, res) => {
   res.send('<h1>Hey Socket.io</h1>');

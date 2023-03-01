@@ -50,7 +50,7 @@ const getClientRoomStranger = (preRoom, id) => {
 function getTime() {
   let today = new Date();
   let date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-  let time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
+  let time = (today.getHours()+7) + ":" + today.getMinutes();
   let dateTime = time + ' ' + date;
   return dateTime;
 }
@@ -96,7 +96,7 @@ io.on('connection', (socket) => {
       createAt: getTime()
     });
   }
-  // find user's all channels from the database and call join event on all of them.
+  
   console.log('a user connected');
   socket.on('disconnect', () => {
     console.log('user disconnected');

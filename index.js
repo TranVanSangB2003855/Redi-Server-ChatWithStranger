@@ -47,13 +47,22 @@ const getClientRoomStranger = (preRoom, id) => {
   return ('stranger-chat-room-' + (++countChatRoom)).toString();
 }
 
+// function getTime() {
+//   let today = new Date();
+//   let date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+//   let time = (today.getHours()+7) + ":" + today.getMinutes();
+//   let dateTime = time + ' ' + date;
+//   return dateTime;
+// }
+
 function getTime() {
-  let today = new Date();
-  let date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-  let time = (today.getHours()+7) + ":" + today.getMinutes();
-  let dateTime = time + ' ' + date;
-  return dateTime;
+    var d = new Date();
+    var utc = d.getTime() + (d.getTimezoneOffset() * 60000); // UTC time
+    var offset = 7; // UTC +7 hours
+    var gmt7 = new Date(utc + (3600000 * (offset - d.getTimezoneOffset() / 60)));
+    return gmt7.toLocaleString('vi-VN', { timeZone: 'UTC' });
 }
+// console.log(getCurrentTimeGMT7().toLocaleString('vi-VN', { timeZone: 'UTC' }));
 
 io.on('connection', (socket) => {
   let preRoom = "";

@@ -1,41 +1,54 @@
-const app = require('express')();
-const http = require('http').createServer(app);
+const express = require("express");
+const cors = require("cors");
 
-app.use(function(req, res, next) {
-  // Mọi domain
-  res.header("Access-Control-Allow-Origin", "*");
-  next();
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+app.use(
+  cookieSession({
+    name: "redi-session",
+    secret: "COOKIE_SECRET", // should use as secret environment variable
+    httpOnly: true
+  })
+);
+
+app.get("/", (res, req) => {
+  req.json({ message: "Welcome to Redi Chat App." });
+})
+
+app.use((err, req, res, next) => {
+  // Middleware xử lý lỗi tập trung.
+  // Trong các đoạn code xử lý ở các route, gọi next(error)
+  // sẽ chuyển về middleware xử lý lỗi này
+  return res.status(err.statusCode || 500).json({
+    message: err.message || "Internal Server Error",
+  });
 });
 
-// jwt secret
-const JWT_SECRET = 'myRandomHash';
 
-const io = require("socket.io")(http, {
+// Socket.io cho Chat với người lạ
+const serverForChatWithStranger = require('http').createServer(app);
+const ioChatWithStranger = require("socket.io")(serverForChatWithStranger, {
   cors: {
     origins: "*",
     credentials: true
   },
 });
-
-
-
-app.get('/', (req, res) => {
-  res.send('<h1>Hey Socket.io</h1>');
-});
-
 let countChatRoom = -1;
 
 const getClientRoomStranger = (preRoom, id) => {
   let i = 0;
   let nameChatRoom = "";
-  console.log("id",id);
+  console.log("id", id);
   for (i = 0; i <= countChatRoom; i++) {
     nameChatRoom = ('stranger-chat-room-' + i).toString();
     if (nameChatRoom === preRoom) continue;
-    if (io.sockets.adapter.rooms.get(nameChatRoom) && io.sockets.adapter.rooms.get(nameChatRoom).size == 1) {
-      const members = io.sockets.adapter.rooms.get(nameChatRoom);
-      for(const member of members){
-        if(member === id){
+    if (ioChatWithStranger.sockets.adapter.rooms.get(nameChatRoom) && ioChatWithStranger.sockets.adapter.rooms.get(nameChatRoom).size == 1) {
+      const members = ioChatWithStranger.sockets.adapter.rooms.get(nameChatRoom);
+      for (const member of members) {
+        if (member === id) {
           break;
         }
         else return nameChatRoom;
@@ -43,28 +56,11 @@ const getClientRoomStranger = (preRoom, id) => {
       continue;
     }
   }
-  
+
   return ('stranger-chat-room-' + (++countChatRoom)).toString();
 }
 
-// function getTime() {
-//   let today = new Date();
-//   let date = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-//   let time = (today.getHours()+7) + ":" + today.getMinutes();
-//   let dateTime = time + ' ' + date;
-//   return dateTime;
-// }
-
-function getTime() {
-    var d = new Date();
-    var utc = d.getTime() + (d.getTimezoneOffset() * 60000); // UTC time
-    var offset = 7; // UTC +7 hours
-    var gmt7 = new Date(utc + (3600000 * (offset - d.getTimezoneOffset() / 60)));
-    return gmt7.toLocaleString('vi-VN', { timeZone: 'UTC' });
-}
-// console.log(getCurrentTimeGMT7().toLocaleString('vi-VN', { timeZone: 'UTC' }));
-
-io.on('connection', (socket) => {
+ioChatWithStranger.on('connection', (socket) => {
   let preRoom = "";
   let clientRoom = getClientRoomStranger(preRoom, socket.id);
   console.log("clientRoom: " + clientRoom + ".....");
@@ -73,61 +69,71 @@ io.on('connection', (socket) => {
   socket.on("nextRoomStranger", data => {
     preRoom = data;
     console.log("preRoom: " + preRoom + "......");
-    io.in(preRoom).emit('statusRoomStranger', {
+    ioChatWithStranger.in(preRoom).emit('statusRoomStranger', {
       content: 'NextRoomNextRoomNgười lạ đã rời đi. Đang đợi người lạ ...',
-      createAt: getTime()
+      createAt: redi.getTime()
     });
     socket.leave(preRoom);
     clientRoom = getClientRoomStranger(preRoom, socket.id);
     console.log("clientRoomNew: " + clientRoom + ".....");
     socket.join(clientRoom);
-    if (io.sockets.adapter.rooms.get(clientRoom).size < 2) {//.length < 2) {
-      io.in(clientRoom).emit('statusRoomStranger', {
+    if (ioChatWithStranger.sockets.adapter.rooms.get(clientRoom).size < 2) {//.length < 2) {
+      ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {
         content: 'Đang đợi người lạ ...',
-        createAt: getTime()
+        createAt: redi.getTime()
       });
     } else {
-      io.in(clientRoom).emit('statusRoomStranger', {
+      ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {
         content: 'Người lạ đã vào phòng|' + clientRoom,
-        createAt: getTime()
+        createAt: redi.getTime()
       });
     }
   })
 
-  if (io.sockets.adapter.rooms.get(clientRoom).size < 2) {//.length < 2) {
-    io.in(clientRoom).emit('statusRoomStranger', {
+  if (ioChatWithStranger.sockets.adapter.rooms.get(clientRoom).size < 2) {//.length < 2) {
+    ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {
       content: 'Đang đợi người lạ ...',
-      createAt: getTime()
+      createAt: redi.getTime()
     });
   } else {
-    io.in(clientRoom).emit('statusRoomStranger', {
+    ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {
       content: 'Người lạ đã vào phòng|' + clientRoom,
-      createAt: getTime()
+      createAt: redi.getTime()
     });
   }
-  
+
   console.log('a user connected');
   socket.on('disconnect', () => {
     console.log('user disconnected');
     socket.to(clientRoom).emit('statusRoomStranger', {
       content: 'Người lạ đã rời đi. Đang đợi người lạ kế tiếp ...',
-      createAt: getTime()
+      createAt: redi.getTime()
     });
   });
 
   socket.on('sendMessageStranger', function (message, callback) {
     socket.to(clientRoom).emit('receiveMessageStranger', {
-      ...message, 
-      createAt: getTime()
+      ...message,
+      createAt: redi.getTime()
     });
 
-    callback({
-      "status": "ok",
-      "createAt": getTime()
-    })
+    //Tui thêm if vì callback typeError khi dùng postman để test
+    if (typeof callback === 'function') {
+      callback({
+        "status": "ok",
+        "createAt": redi.getTime()
+      });
+    }
   })
+
+  socket.on("disconnecting", (reason) => {
+    console.log(reason); // Set { ... }
+    // if(reason === "transport close" || reason === "transport error"){
+    //   socket.co
+    // }
+  });
 });
 
-http.listen(3000, () => {
+serverForChatWithStranger.listen(3000, () => {
   console.log('listening on *:3000');
 });

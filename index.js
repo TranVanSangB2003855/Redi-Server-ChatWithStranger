@@ -6,13 +6,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use(
-  cookieSession({
-    name: "redi-session",
-    secret: "COOKIE_SECRET", // should use as secret environment variable
-    httpOnly: true
-  })
-);
+app.use(function(req, res, next) {
+  // Mọi domain
+  res.header("Access-Control-Allow-Origin", "*");
+  next();
+});
 
 app.get("/", (res, req) => {
   req.json({ message: "Welcome to Redi Chat App." });

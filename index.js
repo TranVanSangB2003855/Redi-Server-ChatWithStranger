@@ -87,7 +87,7 @@ ioChatWithStranger.on('connection', (socket) => {
     if (ioChatWithStranger.sockets.adapter.rooms.get(clientRoom).size < 2) {//.length < 2) {
       ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {
         content: 'Đang đợi người lạ ...',
-        createAt: redi.getTime()
+        createAt: getTime()
       });
     } else {
       ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {

@@ -3,8 +3,8 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
-app.use(express.json());
+// app.use(cors());
+// app.use(express.json());
 
 app.use(function(req, res, next) {
   // Mọi domain
@@ -16,14 +16,14 @@ app.get("/", (res, req) => {
   req.json({ message: "Welcome to Redi Chat App." });
 })
 
-app.use((err, req, res, next) => {
-  // Middleware xử lý lỗi tập trung.
-  // Trong các đoạn code xử lý ở các route, gọi next(error)
-  // sẽ chuyển về middleware xử lý lỗi này
-  return res.status(err.statusCode || 500).json({
-    message: err.message || "Internal Server Error",
-  });
-});
+// app.use((err, req, res, next) => {
+//   // Middleware xử lý lỗi tập trung.
+//   // Trong các đoạn code xử lý ở các route, gọi next(error)
+//   // sẽ chuyển về middleware xử lý lỗi này
+//   return res.status(err.statusCode || 500).json({
+//     message: err.message || "Internal Server Error",
+//   });
+// });
 
 function getTime() {
     var d = new Date();

@@ -48,7 +48,7 @@ let countChatRoom = -1;
 const getClientRoomStranger = (preRoom, id) => {
   let i = 0;
   let nameChatRoom = "";
-  console.log("id", id);
+  //console.log("id", id);
   for (i = 0; i <= countChatRoom; i++) {
     nameChatRoom = ('stranger-chat-room-' + i).toString();
     if (nameChatRoom === preRoom) continue;
@@ -70,19 +70,19 @@ const getClientRoomStranger = (preRoom, id) => {
 ioChatWithStranger.on('connection', (socket) => {
   let preRoom = "";
   let clientRoom = getClientRoomStranger(preRoom, socket.id);
-  console.log("clientRoom: " + clientRoom + ".....");
+  //console.log("clientRoom: " + clientRoom + ".....");
   socket.join(clientRoom);
 
   socket.on("nextRoomStranger", data => {
     preRoom = data;
-    console.log("preRoom: " + preRoom + "......");
+    //console.log("preRoom: " + preRoom + "......");
     ioChatWithStranger.in(preRoom).emit('statusRoomStranger', {
       content: 'NextRoomNextRoomNgười lạ đã rời đi. Đang đợi người lạ ...',
       createAt: getTime()
     });
     socket.leave(preRoom);
     clientRoom = getClientRoomStranger(preRoom, socket.id);
-    console.log("clientRoomNew: " + clientRoom + ".....");
+    //console.log("clientRoomNew: " + clientRoom + ".....");
     socket.join(clientRoom);
     if (ioChatWithStranger.sockets.adapter.rooms.get(clientRoom).size < 2) {//.length < 2) {
       ioChatWithStranger.in(clientRoom).emit('statusRoomStranger', {

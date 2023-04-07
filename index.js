@@ -134,10 +134,7 @@ ioChatWithStranger.on('connection', (socket) => {
   })
 
   socket.on("disconnecting", (reason) => {
-    console.log(reason); // Set { ... }
-    // if(reason === "transport close" || reason === "transport error"){
-    //   socket.co
-    // }
+    console.log("[Socket Stranger] Bị ngắt kết nối đo: "+reason);
   });
 });
 
